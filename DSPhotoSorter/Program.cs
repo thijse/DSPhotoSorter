@@ -10,10 +10,25 @@ namespace PhotoSorter
     {
         static void Main(string[] args)
         {
-            var photoSorter = new PhotoSorter(@"\\nas\shared\Media\Photo");
+
+
+            var sources    = new [] {
+                new PhotoSorter.photoSource()
+                {
+                    path    = @"\\nas\shared\Media\Photo\Fotorol Thijs", postfix = "_thijs"
+                }
+            };
+
+            var destination = @"\\nas\shared\Media\Photo\Sorted";
+            var duplicates  = @"\\nas\shared\Media\Photo\Duplicates";
+
+            var photoSorter = new PhotoSorter(sources,destination,duplicates);
 
             //\\nas\shared\Media\Photo\test
-            photoSorter.ShowDirectory(@"\\nas\shared\Media\Photo\Fotorol Thijs");
+            //photoSorter.ShowDirectory(@"\\nas\shared\Media\Photo\Fotorol Thijs");
+
+            photoSorter.RemoveDuplicatesFromSorted();
+            photoSorter.MoveToSorted();
 
             // \\nas\shared\Media\Photo\Fotorol Manou
         }

@@ -9,7 +9,10 @@ namespace PhotoSorter
     {
         private StreamWriter _logfiles;
         private CultureInfo _cultureInfo;
-        private readonly string _rootPath;
+        private readonly photoSource[] _sourcePaths;
+        private string _duplicatePath;
+        private string _sortedPath;
+        private DupDetector _destinationDuplicates;
 
         struct FilenameInfo
         {
@@ -18,10 +21,17 @@ namespace PhotoSorter
             public int FollowNumber;
         }
 
-
-        public PhotoSorter(string rootPath)
+        public struct photoSource
         {
-            _rootPath = rootPath;
+            public string path;
+            public string postfix;
+        }
+
+        public PhotoSorter(photoSource[] sourcePaths, string sortedPath, string duplicatePath)
+        {
+            _sourcePaths = sourcePaths;
+            _sortedPath = sortedPath;
+            _duplicatePath = duplicatePath;
             _cultureInfo = new CultureInfo("nl-NL"); ;
             _logfiles = new System.IO.StreamWriter(@"SkippedFiles.txt");
         }
@@ -47,76 +57,122 @@ namespace PhotoSorter
 
             foreach (var file in fileList)
             {
-                ShowDate(file);
+                CreateDestPathFromFileName(file);
             }
             Console.ReadLine();
         }
 
-        public void CopyAndClean(string source, string dest)
+        public void RemoveDuplicatesFromSorted()
         {
             // # check destination for redundancies
-                // For each file in nested directory
-                    //check if duplicate
-                        // if duplicate
-                            // keep with lowest follow number /oldest
-                            // move duplicate to duplicate folder (mirroring subfolder structure)
+            _destinationDuplicates = new DupDetector();
+            foreach (var file in FileUtils.RecurseFilesInDirectories(_sortedPath))
+            {
 
-            // # Copy files to folder structure
+                if (
+                    !FileUtils.MatchesFile(file,
+                        new[] {"*.jpg", "*.mp4", "*.png", "*.bmp", "*.raw", "*.mov", "*.gif", "*.mpg", "*.mpeg"}, false))
+                {
+                    Console.WriteLine("{0} no image/movie, skipping", file);
+                    continue;
+                }
+
                 // For each file in nested directory
-                    //check if duplicate present
-                        // if duplicate
-                            // keep with lowest follow number /oldest
-                            // move duplicate to duplicate folder (mirroring subfolder structure)
-                        // if not duplicate
-                            // copy file to suggested directory
-                            // if same filename exist
-                                // add/update follow number
+                if (_destinationDuplicates.HasDuplicate(file))
+                {
+                    // move to duplicate directory
+                    var duplicateFilePath = FileUtils.ChangeFileFolder(file, _sortedPath, _duplicatePath);
+                    if (CreateDirectory(duplicateFilePath)) continue;
+
+                    if (File.Exists(duplicateFilePath) && DupDetector.IsDuplicate(duplicateFilePath, file))
+                    {
+                        Console.WriteLine("{0} has already been copied, should be deleted", file);
+                    }
+
+                    duplicateFilePath = GetUniqueNumberedFileName(duplicateFilePath);
+                    Console.WriteLine("Moving duplicate {0} to {1}", file, duplicateFilePath);
+
+                }
+                else
+                {
+                    // add to list
+                    _destinationDuplicates.AddFile(file);
+                    //Console.WriteLine("No duplicate found for {0}",file);
+                }
+            }
         }
 
-        private void ShowDate(string filename)
+        private static bool CreateDirectory(string filePath)
+        {
+            var directoryName = Path.GetDirectoryName(filePath);
+            if (directoryName == null) return true;
+
+            if (!Directory.Exists(directoryName))
+            {
+                Console.WriteLine("Creating directory {0}", directoryName);
+                //Directory.CreateDirectory(t);
+            }
+            return false;
+        }
+
+        public void MoveToSorted()
+        {
+            foreach (var sourcePath in _sourcePaths)
+            {
+                foreach (var sourceFile in FileUtils.RecurseFilesInDirectories(sourcePath.path))
+                {
+                    var destFile = CreateDestPathFromFileName(sourceFile);
+                    if (
+                        !FileUtils.MatchesFile(destFile,
+                            new[] {"*.jpg", "*.mp4", "*.png", "*.bmp", "*.raw", "*.mov", "*.gif", "*.mpg", "*.mpeg"}, false))
+                    {
+                        Console.WriteLine("{0} no image/movie, skipping", destFile);
+                        continue;
+                    }
+                    
+                    if (File.Exists(destFile) && DupDetector.IsDuplicate(destFile, sourceFile))
+                    {
+                        // File with same name already exists, with same CRC, so file already copied
+                        Console.WriteLine("{0} has already been copied, will not be copied again",sourceFile);
+                    }
+                    else
+                    {
+                        CreateDestPathFromFileName(destFile);
+
+                        // File will be copied to other name
+                        destFile = GetUniqueNumberedFileName(destFile);
+                        Console.WriteLine("copying {0} to {1}",sourceFile,destFile);    
+                    }
+                }
+            }
+        }
+
+
+        private string CreateDestPathFromFileName(string filename)
         {
             var creationTime = File.GetCreationTime(filename);
 
             // Ignore non-image and non movie files
             if (!FileUtils.MatchesFile(filename, new[] {"*.jpg", "*.mp4", "*.png", "*.mov", "*.gif", "*.mpg", "*.mpeg" }, false))
             {
-                LogSkippedFiles(filename + ", NoMatch");
-                return;
+                //LogSkippedFiles(filename + ", NoMatch");
+                return "";
             }
 
             // Try to get date from name 
             var fileData = ParseName(filename);
-            if (fileData.date== null) return;
+            if (fileData.date== null) return "";
 
             if (fileData.date.Value.Date > creationTime.Date)
             {
-                LogSkippedFiles(filename + ", FilenameDatePastCreationDate");
-                return;
+                //LogSkippedFiles(filename + ", FilenameDatePastCreationDate");
+                return "";
             }
 
             var nameOnly = Path.GetFileName(filename);
 
-            // File name reveals date as expect, see if it is numbered (duplicate version)
-            var fileNumber = fileData.FileNumber;
-            if (fileNumber < 0)
-            {
-                LogSkippedFiles(filename + ", NoFileNumber");
-                return;
-            }
-
-
-
-            var newPath = string.Format(_cultureInfo, "{0}\\{1:yyyy}\\{2:MMMM}\\{3}", _rootPath, fileData.date.Value, fileData.date.Value, nameOnly);
-            
-
-            if (File.Exists(newPath)) { Console.WriteLine("{0} - EXISTS", newPath); } else { Console.WriteLine("{0}", newPath); }
-
-            //if (dateFromName.Date == date.Date)
-            //{
-            //    Console.WriteLine("{0} -  {1:dd MMM yyyy} , {2:dd MMM yyyy} - SAME", nameOnly, date, dateFromName);
-            //} else
-
-            //Console.WriteLine("{0} -  {1:dd MMM yyyy} , {2:dd MMM yyyy}", nameOnly, date, dateFromName);
+            var newPath = string.Format(_cultureInfo, "{0}\\{1:yyyy}\\{2:MMMM}\\{3}", _sortedPath, fileData.date.Value, fileData.date.Value, nameOnly);
+            return newPath;
         }
 
         private FilenameInfo ParseName(string filename)
@@ -179,5 +235,41 @@ namespace PhotoSorter
             }
             return filenameInfo;
         }
+
+        private string GetUniqueNumberedFileName(string filename,string postfix = "")
+        {
+            if (!File.Exists(filename)) return filename;
+
+            var name = Path.GetFileNameWithoutExtension(filename);
+            var extension = Path.GetExtension(filename);
+
+            // Check if valid filename
+            if (string.IsNullOrWhiteSpace(name)) return null;
+
+            int followNumber;
+            string filenameWithoutNumber;
+
+            var match = Regex.Match(name, @"(.+)(_| |-)(\d+)$", RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                followNumber = int.Parse(match.Groups[2].Value);
+                filenameWithoutNumber = match.Groups[0].Value + match.Groups[1].Value;
+            }
+            else
+            {
+                filenameWithoutNumber = name;
+                followNumber = 0;
+            }
+            followNumber++;
+            var composedFileName = filenameWithoutNumber + postfix +followNumber + extension;
+            while (!File.Exists(composedFileName))
+            {
+                followNumber++;
+                composedFileName = filenameWithoutNumber + postfix + followNumber + extension;
+            }
+            return composedFileName;
+
+        }
+
     }
 }

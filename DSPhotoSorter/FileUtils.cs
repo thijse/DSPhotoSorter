@@ -54,6 +54,18 @@ namespace PhotoSorter
             return Combine(destinationFolder, Path.GetFileName(sourcePath));
         }
 
+        public static string ChangeFileFolder(string sourcePath, string sourceBase, string destinationFolder)
+        {
+            var sourcePathAbs = Path.GetFullPath(sourcePath);
+            var sourceBaseAbs = Path.GetFullPath(sourceBase);
+
+            if (sourcePathAbs.Substring(0, sourceBaseAbs.Length) != sourceBaseAbs) return null;
+
+            var temp = sourcePathAbs.Remove(0, sourceBaseAbs.Length);
+            var destPath = Combine(destinationFolder, temp);
+            return destPath;
+        }
+
 
         /// <summary>
         /// There are a few interesting combinations of what will and won't combine correctly for Path.Combine, 
@@ -118,11 +130,100 @@ namespace PhotoSorter
             return dirs;
         }
 
-        public static void Empty(string path)
+        public static void DeleteDirectoryContents(string path)
         {
             var dirInfo = new DirectoryInfo(path);
-            foreach (FileInfo file in dirInfo.GetFiles()) file.Delete();
-            foreach (DirectoryInfo subDirectory in dirInfo.GetDirectories()) subDirectory.Delete(true);
+            foreach (var file in dirInfo.GetFiles()) file.Delete();
+            foreach (var subDirectory in dirInfo.GetDirectories()) subDirectory.Delete(true);
+        }
+
+        public static string GetAbsolutePath(string relativePath, string basePath)
+        {
+            if (relativePath == null) return null;
+            basePath = basePath == null ? Path.GetFullPath(".") : GetAbsolutePath(basePath, null);
+            string path;
+            // specific for windows paths starting on \ - they need the drive added to them.
+            // I constructed this piece like this for possible Mono support.
+            if (!Path.IsPathRooted(relativePath) || "\\".Equals(Path.GetPathRoot(relativePath)))
+            {
+                var basePathRoot = Path.GetPathRoot(basePath)??"";
+                path = relativePath.StartsWith(Path.DirectorySeparatorChar.ToString()) ? Path.Combine(basePathRoot, relativePath.TrimStart(Path.DirectorySeparatorChar)) : Path.Combine(basePath, relativePath);
+            }
+            else
+                path = relativePath;
+            // resolves any internal "..\" to get the true full path.
+            return Path.GetFullPath(path);
+        }
+
+        public static System.Collections.Generic.IEnumerable<string> RecurseFilesInDirectories(string root)
+        {
+            // Data structure to hold names of sub-folders to be
+            // examined for files.
+            Stack<string> dirs = new Stack<string>(20);
+
+            if (!System.IO.Directory.Exists(root))
+            {
+                throw new ArgumentException();
+            }
+            dirs.Push(root);
+
+            while (dirs.Count > 0)
+            {
+                var currentDir = dirs.Pop();
+                string[] subDirs;
+                try
+                {
+                    subDirs = System.IO.Directory.GetDirectories(currentDir);
+                }
+                    // An UnauthorizedAccessException exception will be thrown if we do not have
+                    // discovery permission on a folder or file. It may or may not be acceptable 
+                    // to ignore the exception and continue enumerating the remaining files and 
+                    // folders. It is also possible (but unlikely) that a DirectoryNotFound exception 
+                    // will be raised. This will happen if currentDir has been deleted by
+                    // another application or thread after our call to Directory.Exists. The 
+                    // choice of which exceptions to catch depends entirely on the specific task 
+                    // you are intending to perform and also on how much you know with certainty 
+                    // about the systems on which this code will run.
+                catch (UnauthorizedAccessException e)
+                {
+                    Console.WriteLine(e.Message);
+                    continue;
+                }
+                catch (System.IO.DirectoryNotFoundException e)
+                {
+                    Console.WriteLine(e.Message);
+                    continue;
+                }
+
+                string[] files = null;
+                try
+                {
+                    files = System.IO.Directory.GetFiles(currentDir);
+                }
+
+                catch (UnauthorizedAccessException e)
+                {
+
+                    //Console.WriteLine(e.Message);
+                    continue;
+                }
+
+                catch (System.IO.DirectoryNotFoundException e)
+                {
+                    //Console.WriteLine(e.Message);
+                    continue;
+                }
+                // Perform the required action on each file here.
+                // Modify this block to perform your required task.
+                foreach (var file in files)
+                {
+                    yield return file;
+                }
+
+                // Push the subdirectories onto the stack for traversal.
+                // This could also be done before handing the files.
+                foreach (var str in subDirs) dirs.Push(str);
+            }
         }
     }
 }

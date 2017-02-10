@@ -92,6 +92,11 @@ namespace PhotoSorter
             return duplicate;
         }
 
+        public bool HasDuplicate(string fileName)
+        {
+            return GetHash(fileName)!=null;
+        }
+
         public List<Duplicate> FindDuplicates(List<string> fileNames)
         {
             var fullHashes = new HashSet<string>();
