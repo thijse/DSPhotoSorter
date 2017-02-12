@@ -15,7 +15,7 @@ namespace PhotoSorter
             var sources    = new [] {
                 new PhotoSorter.photoSource()
                 {
-                    path    = @"\\nas\shared\Media\Photo\Fotorol Thijs", postfix = "_thijs"
+                    path    = @"\\nas\shared\Media\Photo\Fotorol Manou", postfix = "_manou"
                 }
             };
 
@@ -29,7 +29,7 @@ namespace PhotoSorter
 
             photoSorter.IndexAndCleanSorted();
             photoSorter.MoveToSorted();
-
+            Console.WriteLine("Done");
             // \\nas\shared\Media\Photo\Fotorol Manou
         }
     }

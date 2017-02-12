@@ -46,22 +46,6 @@ namespace PhotoSorter
             _logfiles.WriteLine(logLine);
         }
 
-        //public  void ShowDirectory(string path)
-        //{
-        //    //path = Path.GetDirectoryName(path);
-        //    if (!Directory.Exists(path)) return;
-
-
-        //    var fileList = Directory.GetFiles(path);
-
-
-        //    foreach (var file in fileList)
-        //    {
-        //        CreateDestPathFromFileName(file);
-        //    }
-        //    Console.ReadLine();
-        //}
-
         public void IndexAndCleanSorted()
         {
             // # check destination for redundancies
@@ -174,7 +158,7 @@ namespace PhotoSorter
         private static bool CreateDirectory(string filePath)
         {
             var directoryName = Path.GetDirectoryName(filePath);
-            if (directoryName == null) return true;
+            if (string.IsNullOrEmpty(directoryName)) return true;
 
             if (!Directory.Exists(directoryName))
             {
@@ -278,7 +262,7 @@ namespace PhotoSorter
         private string GetUniqueNumberedFileName(string filename,string postfix = "")
         {
             if (!File.Exists(filename)) return filename;
-
+            var directory = Path.GetDirectoryName(filename);
             var name = Path.GetFileNameWithoutExtension(filename);
             var extension = Path.GetExtension(filename);
 
@@ -288,11 +272,12 @@ namespace PhotoSorter
             int followNumber;
             string filenameWithoutNumber;
 
-            var match = Regex.Match(name, @"(.+)(_| |-)(\d+)$", RegexOptions.IgnoreCase);
+            //var match = Regex.Match(name, @"(.+)(_| |-)(\d+)$", RegexOptions.IgnoreCase);
+            var match = Regex.Match(name, @"IMG_(\d{8})_(\d+)_(\d+)", RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 followNumber = int.Parse(match.Groups[2].Value);
-                filenameWithoutNumber = match.Groups[0].Value + match.Groups[1].Value;
+                filenameWithoutNumber = "IMG_"+match.Groups[0].Value +"_" + match.Groups[1].Value;
             }
             else
             {
@@ -300,11 +285,11 @@ namespace PhotoSorter
                 followNumber = 0;
             }
             followNumber++;
-            var composedFileName = filenameWithoutNumber + postfix +followNumber + extension;
-            while (!File.Exists(composedFileName))
+            var composedFileName = directory + @"\" + filenameWithoutNumber + postfix + "_"+followNumber + extension;
+            while (File.Exists(composedFileName))
             {
                 followNumber++;
-                composedFileName = filenameWithoutNumber + postfix + followNumber + extension;
+                composedFileName = directory + @"\" + filenameWithoutNumber + postfix + "_" + followNumber + extension;
             }
             return composedFileName;
 
