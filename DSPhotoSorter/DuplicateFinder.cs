@@ -38,7 +38,7 @@ namespace PhotoSorter
 
             foreach (var fileName in fileNames)
             {
-                _fileNo++;
+                
                 var fullHash = AddFileGetHash(fileName);
                 if (fullHash != null) fullHashes.Add(fullHash);
             }
@@ -71,7 +71,7 @@ namespace PhotoSorter
         public Duplicate AddFileFindDuplicate(string fileName)
         {
             var fullHash = AddFileGetHash(fileName);
-
+            if (fullHash == null) return null;
             var duplicate = new Duplicate();
             duplicate.Items.AddRange(_sameFullHashGroups[fullHash].Files);
             return duplicate;
@@ -129,11 +129,30 @@ namespace PhotoSorter
             // Add all files in groups based on size
             if (!_sameSizeGroups.ContainsKey(fileInfo.Length)) return null;
 
+            if (_sameSizeGroups[fileInfo.Length].Files.Count == 1 &&
+                string.IsNullOrEmpty(_sameSizeGroups[fileInfo.Length].Files[0].QuickHash))
+                {
+                    // Single file in group, so no quickhash comparison done. Create one now
+                    var prevFileItem = _sameSizeGroups[fileInfo.Length].Files[0];
+                    AddToQuickHash(prevFileItem);
+                }
+
             var quickHash = HashTool.QuickHashFile(fileName);
             if (!_sameQuickHashGroups.ContainsKey(quickHash)) return null;
 
+
+            if (_sameQuickHashGroups[quickHash].Files.Count == 1 &&
+                 string.IsNullOrEmpty(_sameQuickHashGroups[quickHash].Files[0].FullHash))
+            {
+                // quickhash in group, but no fullhash comparison done. Create one now
+                var prevFileItem = _sameQuickHashGroups[quickHash].Files[0];
+                AddToFullHash(prevFileItem);
+            }
+
             var fullHash = HashTool.HashFile(fileName);
-            return !_sameFullHashGroups.ContainsKey(fullHash) ? null : fullHash;
+            if (!_sameFullHashGroups.ContainsKey(fullHash)) return null;
+            return fullHash;
+            //return !_sameFullHashGroups.ContainsKey(fullHash) ? null : fullHash;
         }
 
 
@@ -146,7 +165,7 @@ namespace PhotoSorter
                 Size = fileInfo.Length,
                 ModifiedTime = fileInfo.LastWriteTime
             };
-
+            _fileNo++;
             // Add all files in groups based on size
             if (_sameSizeGroups.ContainsKey(fileItem.Size))
             {

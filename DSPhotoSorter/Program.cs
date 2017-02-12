@@ -27,7 +27,7 @@ namespace PhotoSorter
             //\\nas\shared\Media\Photo\test
             //photoSorter.ShowDirectory(@"\\nas\shared\Media\Photo\Fotorol Thijs");
 
-            photoSorter.RemoveDuplicatesFromSorted();
+            photoSorter.IndexAndCleanSorted();
             photoSorter.MoveToSorted();
 
             // \\nas\shared\Media\Photo\Fotorol Manou

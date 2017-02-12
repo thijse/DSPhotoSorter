@@ -46,23 +46,23 @@ namespace PhotoSorter
             _logfiles.WriteLine(logLine);
         }
 
-        public  void ShowDirectory(string path)
-        {
-            //path = Path.GetDirectoryName(path);
-            if (!Directory.Exists(path)) return;
+        //public  void ShowDirectory(string path)
+        //{
+        //    //path = Path.GetDirectoryName(path);
+        //    if (!Directory.Exists(path)) return;
 
 
-            var fileList = Directory.GetFiles(path);
+        //    var fileList = Directory.GetFiles(path);
 
 
-            foreach (var file in fileList)
-            {
-                CreateDestPathFromFileName(file);
-            }
-            Console.ReadLine();
-        }
+        //    foreach (var file in fileList)
+        //    {
+        //        CreateDestPathFromFileName(file);
+        //    }
+        //    Console.ReadLine();
+        //}
 
-        public void RemoveDuplicatesFromSorted()
+        public void IndexAndCleanSorted()
         {
             // # check destination for redundancies
             _destinationDuplicates = new DupDetector();
@@ -71,9 +71,9 @@ namespace PhotoSorter
 
                 if (
                     !FileUtils.MatchesFile(file,
-                        new[] {"*.jpg", "*.mp4", "*.png", "*.bmp", "*.raw", "*.mov", "*.gif", "*.mpg", "*.mpeg"}, false))
+                        new[] {"*.jpg", "*.mp4", "*.png", "*.bmp", "*.raw", "*.mov", "*.gif", "*.mpg", "*.mpeg",".psd"}, false))
                 {
-                    Console.WriteLine("{0} no image/movie, skipping", file);
+                  //  Console.WriteLine("{0} no image/movie, skipping", file);
                     continue;
                 }
 
@@ -82,7 +82,7 @@ namespace PhotoSorter
                 {
                     // move to duplicate directory
                     var duplicateFilePath = FileUtils.ChangeFileFolder(file, _sortedPath, _duplicatePath);
-                    if (CreateDirectory(duplicateFilePath)) continue;
+                    //if (CreateDirectory(duplicateFilePath)) continue;
 
                     if (File.Exists(duplicateFilePath) && DupDetector.IsDuplicate(duplicateFilePath, file))
                     {
@@ -90,16 +90,85 @@ namespace PhotoSorter
                     }
 
                     duplicateFilePath = GetUniqueNumberedFileName(duplicateFilePath);
-                    Console.WriteLine("Moving duplicate {0} to {1}", file, duplicateFilePath);
+                    MoveFile(file, duplicateFilePath);
 
                 }
                 else
                 {
                     // add to list
-                    _destinationDuplicates.AddFile(file);
+                    //_destinationDuplicates.AddFile(file);
+                    var duplicates = _destinationDuplicates.AddFileFindDuplicate(file);
+                    if (duplicates!=null && duplicates.Items.Count > 1)
+                    {
+                        Console.WriteLine("Unexpected!");    
+                    }
                     //Console.WriteLine("No duplicate found for {0}",file);
                 }
             }
+        }
+
+        public void MoveToSorted()
+        {
+            foreach (var sourcePath in _sourcePaths)
+            {
+                foreach (var sourceFile in FileUtils.RecurseFilesInDirectories(sourcePath.path))
+                {
+                    if (
+                        !FileUtils.MatchesFile(sourceFile,
+                            new[] { "*.jpg", "*.mp4", "*.png", "*.bmp", "*.raw", "*.mov", "*.gif", "*.mpg", "*.mpeg" }, false))
+                    {
+                        //Console.WriteLine("{0} no image/movie, skipping", destFile);
+                        continue;
+                    }
+
+
+                    var destFile = CreateDestPathFromFileName(sourceFile);
+                    if (destFile == "")
+                    {
+                        Console.WriteLine("could not create path from name {0}", sourceFile);
+                        continue;
+                    }
+
+                    if (_destinationDuplicates.HasDuplicate(sourceFile))
+                    {
+                        Console.WriteLine("{0} is duplicate, will not be copied again", sourceFile);                       
+                    }
+                    else
+                    {
+                        //destFile = CreateDestPathFromFileName(destFile);
+
+                        // File will be copied to other name
+                        destFile = GetUniqueNumberedFileName(destFile);
+                        CopyFile(sourceFile, destFile);
+
+                        var duplicates = _destinationDuplicates.AddFileFindDuplicate(destFile);
+                        if (duplicates != null && duplicates.Items.Count > 1)
+                        {
+                            Console.WriteLine("Unexpected!");
+                        }
+                        
+                        //Console.WriteLine("copying {0} to {1}", sourceFile, destFile);
+                    }
+                }
+            }
+        }
+
+        private static void MoveFile(string sourceFilePath, string destinationFilePath)
+        {
+            if(sourceFilePath==null || destinationFilePath== null) return;
+            if (!File.Exists(sourceFilePath) || File.Exists(destinationFilePath)) return;            
+            Console.WriteLine("Moving duplicate {0} to {1}", sourceFilePath, destinationFilePath);
+            CreateDirectory(destinationFilePath);
+            File.Move(sourceFilePath, destinationFilePath);
+        }
+
+        private static void CopyFile(string sourceFilePath, string destinationFilePath)
+        {
+            if (sourceFilePath == null || destinationFilePath == null) return;
+            if (!File.Exists(sourceFilePath) || File.Exists(destinationFilePath)) return;
+            Console.WriteLine("Copying file {0} to {1}", sourceFilePath, destinationFilePath);
+            CreateDirectory(destinationFilePath);
+            File.Copy(sourceFilePath, destinationFilePath);
         }
 
         private static bool CreateDirectory(string filePath)
@@ -110,42 +179,12 @@ namespace PhotoSorter
             if (!Directory.Exists(directoryName))
             {
                 Console.WriteLine("Creating directory {0}", directoryName);
-                //Directory.CreateDirectory(t);
+                Directory.CreateDirectory(directoryName);
             }
             return false;
         }
 
-        public void MoveToSorted()
-        {
-            foreach (var sourcePath in _sourcePaths)
-            {
-                foreach (var sourceFile in FileUtils.RecurseFilesInDirectories(sourcePath.path))
-                {
-                    var destFile = CreateDestPathFromFileName(sourceFile);
-                    if (
-                        !FileUtils.MatchesFile(destFile,
-                            new[] {"*.jpg", "*.mp4", "*.png", "*.bmp", "*.raw", "*.mov", "*.gif", "*.mpg", "*.mpeg"}, false))
-                    {
-                        Console.WriteLine("{0} no image/movie, skipping", destFile);
-                        continue;
-                    }
-                    
-                    if (File.Exists(destFile) && DupDetector.IsDuplicate(destFile, sourceFile))
-                    {
-                        // File with same name already exists, with same CRC, so file already copied
-                        Console.WriteLine("{0} has already been copied, will not be copied again",sourceFile);
-                    }
-                    else
-                    {
-                        CreateDestPathFromFileName(destFile);
 
-                        // File will be copied to other name
-                        destFile = GetUniqueNumberedFileName(destFile);
-                        Console.WriteLine("copying {0} to {1}",sourceFile,destFile);    
-                    }
-                }
-            }
-        }
 
 
         private string CreateDestPathFromFileName(string filename)
@@ -163,7 +202,7 @@ namespace PhotoSorter
             var fileData = ParseName(filename);
             if (fileData.date== null) return "";
 
-            if (fileData.date.Value.Date > creationTime.Date)
+            if (fileData.date.Value.Date > creationTime.Date|| fileData.date.Value.Date> DateTime.Now)
             {
                 //LogSkippedFiles(filename + ", FilenameDatePastCreationDate");
                 return "";
