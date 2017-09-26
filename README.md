@@ -57,15 +57,16 @@ When run the first time, the application will create a configuration.json file w
 }
 ```
 
-DestinationPath   - The root folder where unique images will be copied to and sorted
-DuplicatesPath    - The folder where duplicate images will be copied to. This folder should be cleaned at the discretion of the user
-ConfigurationPath - The folder where a list of previously images are kept (processedFiles.txt)
-Sources > Path    - The folder of each photo roll
-Sources > Postfix - A postfix to be attached to the images. Can be used to indicate the source. This will not influence deduplication
+* DestinationPath   - The root folder where unique images will be copied to and sorted
+* DuplicatesPath    - The folder where duplicate images will be copied to. This folder should be cleaned at the discretion of the user
+* ConfigurationPath - The folder where a list of previously images are kept (processedFiles.txt)
+* Sources > Path    - The folder of each photo roll
+* Sources > Postfix - A postfix to be attached to the images. Can be used to indicate the source. This will not influence deduplication
 
 If the tool is used with different URIs to access the images, the paths in the processedFiles.txt would differ, and files could be copied again. This mapping is used to give them a consistent path in processedFiles.txt.
-MapRootFrom       - the root path as the images are accessed by this instance of the sorter
-MapRootTo         - the root path of how the images are stored 
+
+* MapRootFrom       - the root path as the images are accessed by this instance of the sorter
+* MapRootTo         - the root path of how the images are stored 
 
 ## Copyright
 
