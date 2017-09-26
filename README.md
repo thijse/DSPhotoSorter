@@ -7,7 +7,7 @@ DSPhotoSorter - Photo sorter and deduplicator for Synology DS Photo
 
 DSPhotoSorter is a commandline tool that processes photostreams on a Synology NAS. Synology supplies a Iphone & Android app that auto-uploads photos from the camera roll of the phone to a selected Synology NAS without much additional intelligence.
 
-This tool helps organize photos (e.g. for retaining only relevant family photos). It does this by taking the images (& movies) frome these photo streams, sees if they are unique and if so copies the file into a <ROOT>\Sorted\<YEAR>\<MONTH> folder structure. This helps for example with images that are shared through whatsapp and end up in everybodies photo roll.  Additionally, it notes which photos have been copied, so that if these images are then deleted from the <ROOT>\Sorted folders they will not come back.
+This tool helps organize photos (e.g. for retaining only relevant family photos). It does this by taking the images (& movies) frome these photo streams, sees if they are unique and if so copies the file into a <ROOT>\Sorted\<YEAR>\<MONTH> folder structure. This helps, for example, with images that are shared through WhatsApp group and end up in everybodies photo roll.  Additionally, it notes which photos have been copied, so that if these images are then deleted from the <ROOT>\Sorted folders they will not come back.
 
 ## Features
 
@@ -16,7 +16,7 @@ This tool helps organize photos (e.g. for retaining only relevant family photos)
 * Copy-once 
 * MIT License
 
-## Tested for 
+## Tested  
 
 * C# .NET
 * MONO, .NET core are to be tested. This would be useful so that the tool could run on the NAS or a Raspberry Pi
@@ -32,7 +32,7 @@ This package can only be downloaded from GitHub.
 
 - By downloading a release
 
-##Configuration
+## Configuration
 
 When run the first time, the application will create a configuration.json file which you will need to update and place in the same folder as the DsPhotoSorter
 
