@@ -236,13 +236,5 @@ namespace PhotoSorter
                 return null;
             }
         }
-
-
-        //private static void Log(string text)
-        //{
-        //    Console.WriteLine(text);
-        //    File.AppendAllText("log.txt", text);
-        //    File.AppendAllText("log.txt", "\r\n");
-        //}
     }
 }
