@@ -45,12 +45,6 @@ namespace PhotoSorter
             {
                 new PhotoSorter.PhotoSource() {Path = @"\\NAS\photo\Camera Roll Name1", Postfix = "_name1"},
             };
-
-            AlternativeRootFolders = new List<string>()
-            {
-                @"\\NAS\",
-                @"\\192.168.1.1",
-            };
         }
 
 
