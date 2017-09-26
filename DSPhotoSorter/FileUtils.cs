@@ -151,7 +151,7 @@ namespace PhotoSorter
             }
             else
                 path = relativePath;
-            // resolves any internal "..\" to get the true full path.
+            // resolves any internal "..\" to get the true full Path.
             return Path.GetFullPath(path);
         }
 
@@ -184,14 +184,12 @@ namespace PhotoSorter
                     // choice of which exceptions to catch depends entirely on the specific task 
                     // you are intending to perform and also on how much you know with certainty 
                     // about the systems on which this code will run.
-                catch (UnauthorizedAccessException e)
+                catch (UnauthorizedAccessException )
                 {
-                    Console.WriteLine(e.Message);
                     continue;
                 }
-                catch (System.IO.DirectoryNotFoundException e)
+                catch (System.IO.DirectoryNotFoundException )
                 {
-                    Console.WriteLine(e.Message);
                     continue;
                 }
 
@@ -201,14 +199,14 @@ namespace PhotoSorter
                     files = System.IO.Directory.GetFiles(currentDir);
                 }
 
-                catch (UnauthorizedAccessException e)
+                catch (UnauthorizedAccessException)
                 {
 
                     //Console.WriteLine(e.Message);
                     continue;
                 }
 
-                catch (System.IO.DirectoryNotFoundException e)
+                catch (System.IO.DirectoryNotFoundException )
                 {
                     //Console.WriteLine(e.Message);
                     continue;
