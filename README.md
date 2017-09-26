@@ -38,17 +38,15 @@ When run the first time, the application will create a configuration.json file w
 
 ```json
 {
-  "DestinationPath": "\\NAS\photo\Sorted\",
-  "DuplicatesPath": "\\NAS\\photo\Duplicates\\",
-  "ConfigurationPath": "\\NAS\\photo\Configuration\",
-  "Sources": [
-    {
-      "Path": "\\NAS\photo\Camera Roll Name1",
-      "Postfix": "_name1"
-    }
-  ],
-  "MapRootFrom": "\\192.168.1.1",
-  "MapRootTo": "\\NAS"
+    "DestinationPath": "\\NAS\photo\Sorted\",
+    "DuplicatesPath": "\\NAS\\photo\Duplicates\\",
+    "ConfigurationPath": "\\NAS\\photo\Configuration\",
+    "Sources": [{
+        "Path": "\\NAS\photo\Camera Roll Name1",
+        "Postfix": "_name1"
+    }],
+    "MapRootFrom": "\\192.168.1.1",
+    "MapRootTo": "\\NAS"
 }
 ```
 
