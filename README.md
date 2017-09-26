@@ -26,7 +26,7 @@ This tool helps organize photos (e.g. for retaining only relevant family photos)
 This package can only be downloaded from GitHub. 
 
 - By directly loading fetching the Archive from GitHub: 
- 1. Go to [https://github.com/thijse/Arduino-Log](https://github.com/thijse/Arduino-Log)
+ 1. Go to [https://github.com/thijse/DSPhotoSorter](https://github.com/thijse/DSPhotoSorter)
  2. Click the DOWNLOAD ZIP button in the panel on the
  3. Optionally rename the uncompressed folder **DSPhotoSorter-master** to **DSPhotoSorter**.
 
