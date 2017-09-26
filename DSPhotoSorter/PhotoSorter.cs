@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region DS Photosorter - MIT - (c) 2017 Thijs Elenbaas.
+/*
+  DS Photosorter - tool that processes photos captured with Synology DS Photo
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  Copyright 2017 - Thijs Elenbaas
+*/
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -15,10 +34,10 @@ namespace PhotoSorter
         private readonly string _sortedPath;        
         private readonly string _configurationPath;
         private readonly HashSet<string> _processedFilesList;
+        private readonly string _mapRootFrom;
+        private readonly string _mapRootTo;
         private DupDetector _destinationDuplicates;
-        private int _processedFilesListPrevCount;        
-        private string _mapRootFrom;
-        private string _mapRootTo;
+        private int _processedFilesListPrevCount;
 
         struct FilenameInfo
         {
@@ -153,7 +172,6 @@ namespace PhotoSorter
                 {
                     // move to duplicate directory
                     var duplicateFilePath = FileUtils.ChangeFileFolder(file, _sortedPath, _duplicatePath);
-                    //if (CreateDirectory(duplicateFilePath)) continue;
 
                     if (File.Exists(duplicateFilePath) && DupDetector.IsDuplicate(duplicateFilePath, file))
                     {
@@ -285,7 +303,6 @@ namespace PhotoSorter
             // Ignore non-image and non movie files
             if(!FileUtils.MatchesFile(filename,new[] { "*.jpg", "*.mp4", "*.png", "*.bmp", "*.raw", "*.mov", "*.gif", "*.mpg", "*.mpeg", "*.psd" }, false))    
             {
-                //LogSkippedFiles(filename + ", NoMatch");
                 return "";
             }
 
@@ -295,7 +312,6 @@ namespace PhotoSorter
 
             if (fileData.Date.Value.Date > creationTime.Date|| fileData.Date.Value.Date> DateTime.Now)
             {
-                //LogSkippedFiles(filename + ", FilenameDatePastCreationDate");
                 return "";
             }
 

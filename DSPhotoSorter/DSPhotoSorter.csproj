@@ -53,7 +53,6 @@
     <Compile Include="FileUtils.cs" />
     <Compile Include="Groups.cs" />
     <Compile Include="HashTool.cs" />
-    <Compile Include="Inireader.cs" />
     <Compile Include="PhotoSorter.cs" />
     <Compile Include="PhotoSorterConfig.cs" />
     <Compile Include="Program.cs" />
