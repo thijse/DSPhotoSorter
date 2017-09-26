@@ -13,7 +13,7 @@ This tool helps organize photos (e.g. for retaining only relevant family photos)
 
 * Fast deduplication of photos
 * Filename-based Year & month sorting 
-* Copy-once 
+* Copy images only once 
 * MIT License
 
 ## Tested  
