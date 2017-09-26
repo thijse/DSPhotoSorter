@@ -24,14 +24,17 @@ This tool helps organize photos (e.g. for retaining only relevant family photos)
 
 ## Downloading
 
-This package can only be downloaded from GitHub. 
+This Application is not available through Nuget can only be downloaded from GitHub. 
 
 - By directly loading fetching the Archive from GitHub: 
- 1. Go to [https://github.com/thijse/DSPhotoSorter](https://github.com/thijse/DSPhotoSorter)
- 2. Click the DOWNLOAD ZIP button in the panel on the
- 3. Optionally rename the uncompressed folder **DSPhotoSorter-master** to **DSPhotoSorter**.
+  1. Go to [https://github.com/thijse/DSPhotoSorter](https://github.com/thijse/DSPhotoSorter)
+  2. Click the DOWNLOAD ZIP button in the panel on the
+  3. Optionally rename the uncompressed folder **DSPhotoSorter-master** to **DSPhotoSorter**.
 
 - By downloading a release
+  1. Go to releases
+  2. Click the 'Source code' button
+
 
 ## Configuration
 
